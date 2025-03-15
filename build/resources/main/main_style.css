@@ -1,0 +1,101 @@
+
+.root {
+
+    -fx-background-image: url("bg.jpg"); /* Путь к изображению */
+    -fx-background-size: cover; /* Растянуть изображение на весь фон */
+    -fx-background-position: center; /* Позиция изображения (центр) */
+    -fx-background-repeat: no-repeat; /* Не повторять изображение */
+}
+
+/* Стиль для кнопок */
+/* Стиль для кнопок */
+.button {
+    -fx-background-color: #4CAF50; /* Зеленый фон */
+    -fx-text-fill: white; /* Белый текст */
+    -fx-font-size: 18px;
+    -fx-border-radius: 20px; /* Скругление углов */
+    -fx-border-width: 4px; /* Толщина границы */
+    -fx-background-radius: 20px;
+    -fx-border-color: #4CAF50; /* Цвет границы */
+}
+
+.button:hover {
+    -fx-background-color: #2d752f; /* Темно-зеленый фон при наведении */
+    -fx-border-color: #4CAF50; /* Цвет границы при наведении */
+}
+
+.button:pressed {
+    -fx-background-color: #388E3C; /* Еще более темный зеленый при нажатии */
+}
+
+/* Стиль для таблицы */
+.table-view {
+    -fx-background-color: #ffffff; /* Белый фон */
+
+    -fx-border-color: #cccccc; /* Серая рамка */
+    -fx-border-width: 1px;
+}
+
+.table-row-cell {
+    -fx-background-color: #f9f9f9; /* Светло-серый фон строк */
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #e0e0e0; /* Чередующийся фон строк */
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #4CAF50; /* Зеленый фон выбранной строки */
+    -fx-text-fill: white; /* Белый текст выбранной строки */
+}
+
+/* Стиль для заголовков таблицы */
+.table-column {
+    -fx-alignment: CENTER; /* Выравнивание текста по центру */
+    -fx-font-size: 14px;
+}
+
+/* Стиль для текстовых полей */
+.text-field {
+    -fx-background-color: #ffffff; /* Белый фон */
+    -fx-border-color: #cccccc; /* Серая рамка */
+    -fx-border-radius: 5px;
+    -fx-padding: 5px;
+}
+
+.combo-box {
+    -fx-background-color: #ffffff; /* Белый фон */
+    -fx-border-color: #cccccc; /* Серая граница */
+    -fx-border-radius: 5px; /* Скругление углов */
+    -fx-border-width: 2px; /* Толщина границы */
+    -fx-padding: 5px; /* Внутренние отступы */
+    -fx-font-size: 14px; /* Размер шрифта */
+    -fx-text-fill: #000000; /* Цвет текста */
+    -fx-font-weight: bold;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: #4CAF50; /* Зеленый фон кнопки со стрелкой */
+    -fx-background-radius: 0 5px 5px 0; /* Скругление углов справа */
+}
+
+.combo-box .arrow {
+    -fx-background-color: white; /* Белый цвет стрелки */
+}
+
+.combo-box .list-cell {
+    -fx-background-color: #ffffff; /* Белый фон элементов списка */
+    -fx-text-fill: #000000; /* Цвет текста элементов списка */
+}
+
+.combo-box .list-cell:hover {
+    -fx-background-color: #4CAF50; /* Зеленый фон при наведении */
+    -fx-text-fill: white; /* Белый текст при наведении */
+}
+
+.combo-box .list-view {
+    -fx-background-color: #ffffff; /* Белый фон выпадающего списка */
+    -fx-border-color: #cccccc; /* Серая граница выпадающего списка */
+    -fx-border-radius: 5px; /* Скругление углов выпадающего списка */
+}
+

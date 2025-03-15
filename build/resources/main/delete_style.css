@@ -1,0 +1,70 @@
+/* Стиль для корневого элемента (окна) */
+.root {
+
+    -fx-background-image: url("bg.jpg"); /* Путь к изображению */
+    -fx-background-size: cover; /* Растянуть изображение на весь фон */
+    -fx-background-position: center; /* Позиция изображения (центр) */
+    -fx-background-repeat: no-repeat; /* Не повторять изображение */
+}
+
+/* Стиль для кнопок */
+.button {
+    -fx-background-color: #4CAF50; /* Зеленый фон */
+    -fx-text-fill: white; /* Белый текст */
+    -fx-font-size: 18px;
+    -fx-border-radius: 20px; /* Скругление углов */
+    -fx-border-width: 4px; /* Толщина границы */
+    -fx-background-radius: 20px;
+    -fx-border-color: #4CAF50; /* Цвет границы */
+}
+
+.button:hover {
+    -fx-background-color: #2d752f; /* Темно-зеленый фон при наведении */
+    -fx-border-color: #4CAF50; /* Цвет границы при наведении */
+}
+
+.button:pressed {
+    -fx-background-color: #388E3C; /* Еще более темный зеленый при нажатии */
+}
+.text-field {
+    -fx-background-color: #ffffff; /* Белый фон */
+    -fx-border-color: #ffffff; /* Серая граница */
+    -fx-border-radius: 5px; /* Скругление углов */
+    -fx-background-radius: 5px;
+    -fx-border-width: 3px; /* Толщина границы */
+    -fx-padding: 5px; /* Внутренние отступы */
+    -fx-font-size: 18px; /* Размер шрифта */
+    -fx-text-fill: #000000; /* Цвет текста */
+}
+
+.text-field:focused {
+    -fx-border-color: #4CAF50; /* Зеленая граница при фокусе */
+}
+/* Стиль для таблицы */
+.table-view {
+    -fx-background-color: #ffffff; /* Белый фон */
+
+    -fx-border-color: #cccccc; /* Серая рамка */
+    -fx-border-width: 1px;
+}
+
+.table-row-cell {
+    -fx-background-color: #f9f9f9; /* Светло-серый фон строк */
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #e0e0e0; /* Чередующийся фон строк */
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #4CAF50; /* Зеленый фон выбранной строки */
+    -fx-text-fill: white; /* Белый текст выбранной строки */
+}
+
+/* Стиль для заголовков таблицы */
+.table-column {
+    -fx-alignment: CENTER; /* Выравнивание текста по центру */
+    -fx-font-size: 14px;
+}
+
+
