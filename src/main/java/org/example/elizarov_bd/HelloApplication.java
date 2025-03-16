@@ -1,7 +1,7 @@
 package org.example.elizarov_bd;
 
-
 import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -18,13 +18,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 
 public class HelloApplication extends Application {
-    private final TableView<Student> table = new TableView<>();
-    ObservableList<Student> students = loadDataFromDatabase();
+    private final TableView<Employee> table = new TableView<>();
+    ObservableList<Employee> employees = loadDataFromDatabase();
 
     public static void main(String[] args) {
         launch(args);
@@ -32,9 +33,9 @@ public class HelloApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        table.setItems(students);
-        table.setPrefSize(600, 500);
-        primaryStage.setTitle("Курсовая работа по предмету Базы данных");
+        table.setItems(employees);
+        table.setPrefSize(700, 800);
+        primaryStage.setTitle("Управление персоналом");
 
         // Заголовок
         Label titleLabel = new Label("Курсовая работа по предмету Базы данных");
@@ -43,90 +44,77 @@ public class HelloApplication extends Application {
         Label subtitleLabel = new Label("Елизаров А.Е. ЗИИ-331");
         subtitleLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
 
-
         // Создание колонок таблицы
-        TableColumn<Student, Integer> idColumn = new TableColumn<>("ID");
+        TableColumn<Employee, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        TableColumn<Student, String> lastNameColumn = new TableColumn<>("Фамилия");
-        lastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+        TableColumn<Employee, String> famColumn = new TableColumn<>("Фамилия");
+        famColumn.setCellValueFactory(new PropertyValueFactory<>("fam"));
 
-        TableColumn<Student, String> firstNameColumn = new TableColumn<>("Имя");
-        firstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        TableColumn<Employee, String> imColumn = new TableColumn<>("Имя");
+        imColumn.setCellValueFactory(new PropertyValueFactory<>("im"));
 
-        TableColumn<Student, String> fath = new TableColumn<>("Отчество");
-        fath.setCellValueFactory(new PropertyValueFactory<>("fath"));
+        TableColumn<Employee, String> otchColumn = new TableColumn<>("Отчество");
+        otchColumn.setCellValueFactory(new PropertyValueFactory<>("otch"));
 
-        TableColumn<Student, Integer> birthYearColumn = new TableColumn<>("Год рождения");
-        birthYearColumn.setCellValueFactory(new PropertyValueFactory<>("birthYear"));
+        TableColumn<Employee, String> dolColumn = new TableColumn<>("Должность");
+        dolColumn.setCellValueFactory(new PropertyValueFactory<>("dol"));
 
-        TableColumn<Student, Integer> mark_1 = new TableColumn<>("12.02");
-        mark_1.setCellValueFactory(new PropertyValueFactory<>("mark_1"));
+        TableColumn<Employee, Double> oklColumn = new TableColumn<>("Оклад");
+        oklColumn.setCellValueFactory(new PropertyValueFactory<>("okl"));
 
-        TableColumn<Student, Integer> mark_2 = new TableColumn<>("13.02");
-        mark_2.setCellValueFactory(new PropertyValueFactory<>("mark_2"));
+        TableColumn<Employee, String> tnColumn = new TableColumn<>("Табельный номер");
+        tnColumn.setCellValueFactory(new PropertyValueFactory<>("tn"));
 
-        TableColumn<Student, Integer> mark_3 = new TableColumn<>("14.02");
-        mark_3.setCellValueFactory(new PropertyValueFactory<>("mark_3"));
+        TableColumn<Employee, String> drogColumn = new TableColumn<>("Дата рождения");
+        drogColumn.setCellValueFactory(new PropertyValueFactory<>("drog"));
 
-        TableColumn<Student, Integer> mark_4 = new TableColumn<>("15.02");
-        mark_4.setCellValueFactory(new PropertyValueFactory<>("mark_4"));
+        TableColumn<Employee, Integer> kolDetColumn = new TableColumn<>("Количество детей");
+        kolDetColumn.setCellValueFactory(new PropertyValueFactory<>("kolDet"));
 
-        TableColumn<Student, Integer> teach_surname = new TableColumn<>("Фамилия преподавателя");
-        teach_surname.setCellValueFactory(new PropertyValueFactory<>("teach_surname"));
+        TableColumn<Employee, String> datUColumn = new TableColumn<>("Дата увольнения");
+        datUColumn.setCellValueFactory(new PropertyValueFactory<>("datU"));
 
-        TableColumn<Student, Integer> teach_name = new TableColumn<>("Имя преподавателя");
-        teach_name.setCellValueFactory(new PropertyValueFactory<>("teach_name"));
+        TableColumn<Employee, Boolean> otpColumn = new TableColumn<>("Отпуск");
+        otpColumn.setCellValueFactory(new PropertyValueFactory<>("otp"));
 
-        TableColumn<Student, Integer> teach_midname = new TableColumn<>("Отчество преподавателя");
-        teach_midname.setCellValueFactory(new PropertyValueFactory<>("teach_midname"));
+        TableColumn<Employee, String> obrColumn = new TableColumn<>("Образование");
+        obrColumn.setCellValueFactory(new PropertyValueFactory<>("obr"));
+
+        TableColumn<Employee, String> podrColumn = new TableColumn<>("Подразделение");
+        podrColumn.setCellValueFactory(new PropertyValueFactory<>("podr"));
 
         // Добавление колонок в таблицу
-        Collections.addAll(table.getColumns(), idColumn, lastNameColumn, firstNameColumn, fath, birthYearColumn, mark_1, mark_2, mark_3, mark_4, teach_surname, teach_name, teach_midname);
+        Collections.addAll(table.getColumns(), idColumn, famColumn, imColumn, otchColumn, dolColumn, oklColumn, tnColumn, drogColumn, kolDetColumn, datUColumn, otpColumn, obrColumn, podrColumn);
 
+        // Кнопки меню
+        Button personalCardsButton = new Button("Работа с личными карточками");
+        personalCardsButton.setOnAction(e -> showPersonalCardsWindow());
 
-        // Выпадающий список для сортировки
-        ComboBox<String> sortComboBox = new ComboBox<>();
-        sortComboBox.getItems().addAll("ID", "Фамилия", "Имя", "Год рождения");
-        sortComboBox.setValue("ID"); // Значение по умолчанию
+        Button movementInfoButton = new Button("Сбор информации по движению кадров");
+        movementInfoButton.setOnAction(e -> showMovementInfoWindow());
 
-        // Кнопка сортировки
-        Button sortButton = new Button("Сортировать по");
-        sortButton.setOnAction(e -> {
-            String selectedAttribute = sortComboBox.getValue();
-            switch (selectedAttribute) {
-                case "ID":
-                    students.sort((s1, s2) -> Integer.compare(s1.getId(), s2.getId()));
-                    break;
-                case "Фамилия":
-                    students.sort((s1, s2) -> s1.getLastName().compareTo(s2.getLastName()));
-                    break;
-                case "Имя":
-                    students.sort((s1, s2) -> s1.getFirstName().compareTo(s2.getFirstName()));
-                    break;
-                case "Год рождения":
-                    students.sort((s1, s2) -> Integer.compare(s1.getBirthYear(), s2.getBirthYear()));
-                    break;
-            }
-        });
-        // Кнопка "Добавить студента"
-        Button addStudentButton = new Button("Добавить студента");
-        addStudentButton.setOnAction(e -> addStudent());
-        // Кнопка "Удалить студента"
-        Button deleteButton = new Button("Удалить студента");
-        deleteButton.setOnAction(e -> deleteStudent());
-        // Панель для кнопки и выпадающего списка
-        HBox sortPanel = new HBox(10, sortButton, sortComboBox);
-        sortPanel.setAlignment(Pos.CENTER);
+        Button referenceBooksButton = new Button("Создание и ведение вспомогательных справочников");
+        referenceBooksButton.setOnAction(e -> showReferenceBooksWindow());
+
+        Button timeSheetInfoButton = new Button("Сбор информации и печать справок по табельному учету");
+        timeSheetInfoButton.setOnAction(e -> showTimeSheetInfoWindow());
+
+        Button exitButton = new Button("Выход");
+        exitButton.setOnAction(e -> primaryStage.close());
+
+        // Панель для кнопок меню
+        HBox menuPanel = new HBox(10, exitButton);
+        menuPanel.setAlignment(Pos.BOTTOM_RIGHT);
 
         // Основной макет
-        VBox root = new VBox(10, titleLabel, subtitleLabel, table, sortPanel, addStudentButton, deleteButton);
+        VBox root = new VBox(10, titleLabel, subtitleLabel, table, personalCardsButton, movementInfoButton, referenceBooksButton, timeSheetInfoButton, menuPanel);
+        VBox.setMargin(personalCardsButton, new Insets(20, 0, 0, 0));
         root.setPadding(new Insets(10));
         root.setAlignment(Pos.TOP_CENTER);
 
         Image icon = new Image(Objects.requireNonNull(Objects.requireNonNull(getClass().getResource("/icon.png")).toExternalForm()));
         primaryStage.getIcons().add(icon);
-
         // Настройка сцены
         Scene scene = new Scene(root, 1200, 700);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/main_style.css")).toExternalForm());
@@ -134,223 +122,752 @@ public class HelloApplication extends Application {
         primaryStage.show();
     }
 
-    private ObservableList<Student> loadDataFromDatabase() {
-        ObservableList<Student> students = FXCollections.observableArrayList();
+    private ObservableList<Employee> loadDataFromDatabase() {
+        ObservableList<Employee> employees = FXCollections.observableArrayList();
 
         try (Connection connection = DBConfig.getConnection()) {
-            String query = "SELECT students.id, s_surname, s_name, s_fathland, birth,  mark_1, mark_2, mark_3, mark_4, t_surname, t_name, t_fathland\n" +
-                    "FROM students LEFT JOIN teachers ON (students.teach_id=teachers.id);";
+            String query = "SELECT * FROM Employees";
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
-                String lastName = resultSet.getString("s_surname");
-                String firstName = resultSet.getString("s_name");
-                String fath = resultSet.getString("s_fathland");
-                String teach_name = resultSet.getString("t_name");
-                String teach_surname = resultSet.getString("t_surname");
-                String teach_midname = resultSet.getString("t_fathland");
-                int birthYear = resultSet.getInt("birth");
-                int mark_1 = resultSet.getInt("mark_1");
-                int mark_2 = resultSet.getInt("mark_2");
-                int mark_3 = resultSet.getInt("mark_3");
-                int mark_4 = resultSet.getInt("mark_4");
+                String fam = resultSet.getString("FAM");
+                String im = resultSet.getString("IM");
+                String otch = resultSet.getString("OTCH");
+                String dol = resultSet.getString("DOL");
+                double okl = resultSet.getDouble("OKL");
+                String tn = resultSet.getString("TN");
+                String drog = resultSet.getString("DROG");
+                int kolDet = resultSet.getInt("KOL_DET");
+                String datU = resultSet.getString("DAT_U");
+                boolean otp = resultSet.getBoolean("OTP");
+                String obr = resultSet.getString("OBR");
+                String podr = resultSet.getString("PODR");
 
-                students.add(new Student(id, lastName, firstName, fath, birthYear, mark_1, mark_2, mark_3, mark_4, teach_surname, teach_name, teach_midname));
+                employees.add(new Employee(id, fam, im, otch, dol, okl, tn, drog, kolDet, datU, otp, obr, podr));
+
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return students;
+        return employees;
     }
 
-    private void deleteStudent() {
+    private void showPersonalCardsWindow() {
         Stage stage = new Stage();
-        Image icon = new Image(Objects.requireNonNull(Objects.requireNonNull(getClass().getResource("/delete.png")).toExternalForm()));
-        stage.getIcons().add(icon);
-        stage.setTitle("Удалить студента");
-        ArrayList<TextField> fields = new ArrayList<>();
-        TextField surnameField = new TextField();
-        surnameField.setPromptText("Фамилия");
-        TextField nameField = new TextField();
-        nameField.setPromptText("Имя");
-        TextField fathlandField = new TextField();
-        fathlandField.setPromptText("Отчество");
-        Collections.addAll(fields, surnameField, nameField, fathlandField);
+        stage.setTitle("Работа с личными карточками");
 
-        Button deleteButton = new Button("Удалить");
-        deleteButton.setOnAction(e -> {
-            boolean isAllFull = true;
-            for (TextField field : fields) {
-                field.setStyle("-fx-background-color: white; -fx-text-fill: black;");
-                if (field.getText().isEmpty()) {
-                    field.setPromptText("Окно не должно быть пустым!");
-                    field.setStyle("-fx-background-color: #b0ff91; -fx-prompt-text-fill: #000000;-fx-border-color: #2d752f; ");
-                    isAllFull = false;
-                }
-            }
-            if (isAllFull) {
-                // Получаем данные из полей
-                String surname = surnameField.getText().strip();
-                String name = nameField.getText().strip();
-                String fathland = fathlandField.getText().strip();
+        Button addEmployeeButton = new Button("Добавить сотрудника");
+        addEmployeeButton.setOnAction(e -> addEmployee());
 
-                try (Connection connection = DBConfig.getConnection()) {
-                    String query = "DELETE FROM students  WHERE s_surname=? AND s_name=? AND s_fathland=?";
-                    PreparedStatement statement = connection.prepareStatement(query);
-                    statement.setString(1, surname);
-                    statement.setString(2, name);
-                    statement.setString(3, fathland);
-                    int rowsDeleted = statement.executeUpdate();
-                    // Проверяем, была ли удалена запись
-                    if (rowsDeleted > 0) {
-                        // Создаем информационное окно
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Информация");
-                        alert.setHeaderText("Студент успешно удален");
-                        // Показываем окно и ждем, пока пользователь его закроет
-                        students = loadDataFromDatabase();
-                        table.setItems(students);
-                        alert.showAndWait();
-                        stage.close();
-                    } else {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Информация");
-                        alert.setHeaderText("В базе не существует записи с таким ФИО");
-                        // Показываем окно и ждем, пока пользователь его закроет
-                        alert.showAndWait();
-                    }
-                } catch (SQLException ex) {
-                    System.out.println(ex.getMessage());
-                }
-            }
-        });
-        HBox but = new HBox(20, deleteButton);
-        but.setAlignment(Pos.CENTER);
-        // Макет для формы
-        VBox formLayout = new VBox(4,
-                surnameField,
-                nameField,
-                fathlandField, but
-        );
-        VBox.setMargin(but, new Insets(20, 0, 0, 0));
-        formLayout.setPadding(new Insets(20));
+        Button editEmployeeButton = new Button("Корректировка");
+        editEmployeeButton.setOnAction(e -> editEmployee());
 
-        // Настройка сцены
-        Scene scene = new Scene(formLayout, 400, 600);
-        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/delete_style.css")).toExternalForm());
+        Button deleteEmployeeButton = new Button("Удаление");
+        deleteEmployeeButton.setOnAction(e -> deleteEmployee());
+
+        Button returnButton = new Button("Возврат в меню");
+        returnButton.setOnAction(e -> stage.close());
+
+        VBox layout = new VBox(10, addEmployeeButton, editEmployeeButton, deleteEmployeeButton, returnButton);
+        layout.setPadding(new Insets(10));
+        layout.setAlignment(Pos.CENTER);
+
+        Scene scene = new Scene(layout, 400, 500);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/main_style.css")).toExternalForm());
+
         stage.setScene(scene);
         stage.show();
     }
 
-    private void addStudent() {
-        Stage addStudentStage = new Stage();
-        Image icon = new Image(Objects.requireNonNull(Objects.requireNonNull(getClass().getResource("/add.png")).toExternalForm()));
-        addStudentStage.getIcons().add(icon);
-        addStudentStage.setTitle("Добавить студента");
+    private void showMovementInfoWindow() {
+        Stage stage = new Stage();
+        stage.setTitle("Сбор информации по движению кадров");
 
-        ArrayList<TextField> fields = new ArrayList<>();
-        TextField surnameField = new TextField();
-        surnameField.setPromptText("Фамилия");
-        TextField nameField = new TextField();
-        nameField.setPromptText("Имя");
-        TextField fathlandField = new TextField();
-        fathlandField.setPromptText("Отчество");
-        TextField birthField = new TextField();
-        birthField.setPromptText("Год рождения");
-        TextField mark1Field = new TextField();
-        mark1Field.setPromptText("Первая оценка");
-        TextField mark2Field = new TextField();
-        mark2Field.setPromptText("Вторая оценка");
-        TextField mark3Field = new TextField();
-        mark3Field.setPromptText("Третья оценка");
-        TextField mark4Field = new TextField();
-        mark4Field.setPromptText("Четвертая оценка");
-        TextField teach_id = new TextField();
-        teach_id.setPromptText("ID преподавателя");
-        Collections.addAll(fields, surnameField, nameField, fathlandField, birthField, mark1Field, mark2Field, mark3Field, mark4Field, teach_id);
+        Button hireButton = new Button("Прием");
+        hireButton.setOnAction(e -> hireEmployee());
 
+        Button transferButton = new Button("Перевод");
+        transferButton.setOnAction(e -> transferEmployee());
 
-        // Кнопка "Сохранить"
-        Button saveButton = new Button("Сохранить");
-        saveButton.setOnAction(e -> {
-            boolean isAllFull = true;
-            for (TextField field : fields) {
-                field.setStyle("-fx-background-color: white; -fx-text-fill: black;");
-                if (field.getText().isEmpty()) {
-                    field.setPromptText("Окно не должно быть пустым!");
-                    field.setStyle("-fx-background-color: #b0ff91; -fx-prompt-text-fill: #000000;-fx-border-color: #2d752f; ");
-                    isAllFull = false;
-                }
-            }
-            if (isAllFull) {
-                // Получаем данные из полей
-                String surname = surnameField.getText().strip();
-                String name = nameField.getText().strip();
-                String fathland = fathlandField.getText().strip();
-                int birthYear = Integer.parseInt(birthField.getText());
-                int mark1 = Integer.parseInt(mark1Field.getText());
-                int mark2 = Integer.parseInt(mark2Field.getText());
-                int mark3 = Integer.parseInt(mark3Field.getText());
-                int mark4 = Integer.parseInt(mark4Field.getText());
-                int teach_id_num = Integer.parseInt(teach_id.getText());
+        Button dismissButton = new Button("Увольнение");
+        dismissButton.setOnAction(e -> dismissEmployee());
 
+        Button vacationButton = new Button("Отпуск");
+        vacationButton.setOnAction(e -> manageVacation());
 
-                try (Connection connection = DBConfig.getConnection()) {
-                    String query = "INSERT INTO students  (s_surname, s_name, s_fathland, birth,  mark_1, mark_2, mark_3, mark_4,  teach_id) VALUES (?, ?, ?,?, ?, ?, ?, ?, ?)";
-                    PreparedStatement statement = connection.prepareStatement(query);
-                    statement.setString(1, surname);
-                    statement.setString(2, name);
-                    statement.setString(3, fathland);
-                    statement.setInt(4, birthYear);
-                    statement.setInt(5, mark1);
-                    statement.setInt(6, mark2);
-                    statement.setInt(7, mark3);
-                    statement.setInt(8, mark4);
-                    statement.setInt(9, teach_id_num);
-                    statement.executeUpdate();
-                } catch (SQLException ex) {
-                    System.out.println(ex.getMessage());
-                }
-                // Создаем информационное окно
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Информация");
-                alert.setHeaderText("Студент успешно добавлен");
+        Button returnButton = new Button("Возврат в меню");
+        returnButton.setOnAction(e -> stage.close());
 
-                students = loadDataFromDatabase();
-                table.setItems(students);
-                // Показываем окно и ждем, пока пользователь его закроет
-                alert.showAndWait();
+        VBox layout = new VBox(10, hireButton, transferButton, dismissButton, vacationButton, returnButton);
+        layout.setPadding(new Insets(10));
+        layout.setAlignment(Pos.CENTER);
 
-                // Закрываем окно
-                addStudentStage.close();
-            }
-        });
-        HBox but = new HBox(10, saveButton);
-        but.setAlignment(Pos.CENTER);
-        // Макет для формы
-        VBox formLayout = new VBox(4,
-                surnameField,
-                nameField,
-                fathlandField,
-                birthField,
-                mark1Field,
-                mark2Field,
-                mark3Field,
-                mark4Field,
-                teach_id, but
-        );
-        formLayout.setPadding(new Insets(20));
-        VBox.setMargin(but, new Insets(20, 0, 0, 0));
+        Scene scene = new Scene(layout, 400, 500);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/main_style.css")).toExternalForm());
 
-        // Настройка сцены
-        Scene scene = new Scene(formLayout, 400, 600);
-        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/add_style.css")).toExternalForm());
-        addStudentStage.setScene(scene);
-        addStudentStage.show();
+        stage.setScene(scene);
+        stage.show();
     }
 
+    private void showReferenceBooksWindow() {
+        Stage stage = new Stage();
+        stage.setTitle("Создание и ведение вспомогательных справочников");
 
+        Button professionButton = new Button("По профессии");
+        professionButton.setOnAction(e -> manageProfession());
+
+        Button educationButton = new Button("По образованию (ученой степени)");
+        educationButton.setOnAction(e -> manageEducation());
+
+        Button salaryButton = new Button("По зарплате");
+        salaryButton.setOnAction(e -> manageSalary());
+
+        Button returnButton = new Button("Возврат в меню");
+        returnButton.setOnAction(e -> stage.close());
+
+        VBox layout = new VBox(10, professionButton, educationButton, salaryButton, returnButton);
+        layout.setPadding(new Insets(10));
+        layout.setAlignment(Pos.CENTER);
+
+        Scene scene = new Scene(layout, 400, 500);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/main_style.css")).toExternalForm());
+
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void showTimeSheetInfoWindow() {
+        Stage stage = new Stage();
+        stage.setTitle("Сбор информации и печать справок по табельному учету");
+
+        Button dismissedButton = new Button("Количество уволенных");
+        dismissedButton.setOnAction(e -> showDismissedCount());
+
+        Button laidOffButton = new Button("Количество сокращенных");
+        laidOffButton.setOnAction(e -> showLaidOffCount());
+
+        Button sickLeaveButton = new Button("Количество б/л");
+        sickLeaveButton.setOnAction(e -> showSickLeaveCount());
+
+        Button returnButton = new Button("Возврат в меню");
+        returnButton.setOnAction(e -> stage.close());
+
+        VBox layout = new VBox(10, dismissedButton, laidOffButton, sickLeaveButton, returnButton);
+        layout.setPadding(new Insets(10));
+        layout.setAlignment(Pos.CENTER);
+
+        Scene scene = new Scene(layout, 400, 500);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/main_style.css")).toExternalForm());
+
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void highlightEmptyField(TextField field, String promptText) {
+        field.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
+        field.setPromptText("Поле не должно быть пустым");
+    }
+
+    private void resetFieldStyle(TextField field, String promptText) {
+        field.setStyle(""); // Сброс стиля
+        field.setPromptText(promptText); // Возврат оригинальной подсказки
+    }
+
+    private void addEmployee() {
+        Stage stage = new Stage();
+        stage.setTitle("Добавление сотрудника");
+
+        // Поля для ввода данных с подсказками
+        TextField famField = new TextField();
+        famField.setPromptText("Фамилия");
+
+        TextField imField = new TextField();
+        imField.setPromptText("Имя");
+
+        TextField otchField = new TextField();
+        otchField.setPromptText("Отчество");
+
+        TextField dolField = new TextField();
+        dolField.setPromptText("Должность");
+
+        TextField oklField = new TextField();
+        oklField.setPromptText("Оклад");
+
+        TextField tnField = new TextField();
+        tnField.setPromptText("Табельный номер");
+
+        DatePicker drogPicker = new DatePicker();
+        drogPicker.setPromptText("Дата рождения");
+
+        TextField kolDetField = new TextField();
+        kolDetField.setPromptText("Количество детей");
+
+        DatePicker datUPicker = new DatePicker();
+        datUPicker.setPromptText("Дата увольнения");
+
+        CheckBox otpCheckBox = new CheckBox("В отпуске");
+
+        TextField obrField = new TextField();
+        obrField.setPromptText("Образование");
+
+        TextField podrField = new TextField();
+        podrField.setPromptText("Подразделение");
+
+        Button addButton = new Button("Добавить");
+        addButton.setOnAction(e -> {
+            // Сброс стилей и подсказок
+            resetFieldStyle(famField, "Фамилия");
+            resetFieldStyle(imField, "Имя");
+            resetFieldStyle(otchField, "Отчество");
+            resetFieldStyle(dolField, "Должность");
+            resetFieldStyle(oklField, "Оклад");
+            resetFieldStyle(tnField, "Табельный номер");
+            resetFieldStyle(kolDetField, "Количество детей");
+            resetFieldStyle(obrField, "Образование");
+            resetFieldStyle(podrField, "Подразделение");
+
+            // Проверка заполнения полей
+            boolean isValid = true;
+
+            if (famField.getText().isEmpty()) {
+                highlightEmptyField(famField, "Фамилия");
+                isValid = false;
+            }
+            if (imField.getText().isEmpty()) {
+                highlightEmptyField(imField, "Имя");
+                isValid = false;
+            }
+            if (otchField.getText().isEmpty()) {
+                highlightEmptyField(otchField, "Отчество");
+                isValid = false;
+            }
+            if (dolField.getText().isEmpty()) {
+                highlightEmptyField(dolField, "Должность");
+                isValid = false;
+            }
+            if (oklField.getText().isEmpty()) {
+                highlightEmptyField(oklField, "Оклад");
+                isValid = false;
+            }
+            if (tnField.getText().isEmpty()) {
+                highlightEmptyField(tnField, "Табельный номер");
+                isValid = false;
+            }
+            if (kolDetField.getText().isEmpty()) {
+                highlightEmptyField(kolDetField, "Количество детей");
+                isValid = false;
+            }
+            if (obrField.getText().isEmpty()) {
+                highlightEmptyField(obrField, "Образование");
+                isValid = false;
+            }
+            if (podrField.getText().isEmpty()) {
+                highlightEmptyField(podrField, "Подразделение");
+                isValid = false;
+            }
+
+            // Если все поля заполнены, добавляем сотрудника
+            if (isValid) {
+                try {
+                    String fam = famField.getText();
+                    String im = imField.getText();
+                    String otch = otchField.getText();
+                    String dol = dolField.getText();
+                    double okl = Double.parseDouble(oklField.getText());
+                    String tn = tnField.getText();
+                    LocalDate drog = drogPicker.getValue();
+                    int kolDet = Integer.parseInt(kolDetField.getText());
+                    LocalDate datU = datUPicker.getValue();
+                    boolean otp = otpCheckBox.isSelected();
+                    String obr = obrField.getText();
+                    String podr = podrField.getText();
+
+                    // Добавление в базу данных
+                    try (Connection connection = DBConfig.getConnection()) {
+                        String query = "INSERT INTO Employees (FAM, IM, OTCH, DOL, OKL, TN, DROG, KOL_DET, DAT_U, OTP, OBR, PODR) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        PreparedStatement statement = connection.prepareStatement(query);
+                        statement.setString(1, fam);
+                        statement.setString(2, im);
+                        statement.setString(3, otch);
+                        statement.setString(4, dol);
+                        statement.setDouble(5, okl);
+                        statement.setString(6, tn);
+                        statement.setDate(7, java.sql.Date.valueOf(drog));
+                        statement.setInt(8, kolDet);
+                        statement.setDate(9, datU != null ? java.sql.Date.valueOf(datU) : null);
+                        statement.setBoolean(10, otp);
+                        statement.setString(11, obr);
+                        statement.setString(12, podr);
+                        statement.executeUpdate();
+                    }
+
+                    // Обновление таблицы
+                    employees.setAll(loadDataFromDatabase());
+                    stage.close();
+                } catch (Exception ex) {
+                    System.out.println("Ошибка: " + ex.getMessage());
+                }
+            }
+        });
+
+        VBox layout = new VBox(10,
+                famField, imField, otchField, dolField, oklField, tnField,
+                drogPicker, kolDetField, datUPicker, otpCheckBox, obrField, podrField,
+                addButton);
+        layout.setPadding(new Insets(10));
+
+        Scene scene = new Scene(layout, 400, 600);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/main_style.css")).toExternalForm());
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void editEmployee() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Редактирование сотрудника");
+        dialog.setHeaderText("Введите ID сотрудника:");
+        dialog.setContentText("ID:");
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(id -> {
+            try {
+                int employeeId = Integer.parseInt(id);
+                Employee employee = employees.stream()
+                        .filter(e -> e.getId() == employeeId)
+                        .findFirst()
+                        .orElse(null);
+
+                if (employee != null) {
+                    Stage stage = new Stage();
+                    stage.setTitle("Редактирование сотрудника");
+
+                    // Поля для ввода данных с подсказками
+                    TextField famField = new TextField(employee.getFam());
+                    famField.setPromptText("Фамилия");
+
+                    TextField imField = new TextField(employee.getIm());
+                    imField.setPromptText("Имя");
+
+                    TextField otchField = new TextField(employee.getOtch());
+                    otchField.setPromptText("Отчество");
+
+                    TextField dolField = new TextField(employee.getDol());
+                    dolField.setPromptText("Должность");
+
+                    TextField oklField = new TextField(String.valueOf(employee.getOkl()));
+                    oklField.setPromptText("Оклад");
+
+                    TextField tnField = new TextField(employee.getTn());
+                    tnField.setPromptText("Табельный номер");
+
+                    DatePicker drogPicker = new DatePicker(LocalDate.parse(employee.getDrog()));
+                    drogPicker.setPromptText("Дата рождения");
+
+                    TextField kolDetField = new TextField(String.valueOf(employee.getKolDet()));
+                    kolDetField.setPromptText("Количество детей");
+
+                    DatePicker datUPicker = new DatePicker(employee.getDatU() != null ? LocalDate.parse(employee.getDatU()) : null);
+                    datUPicker.setPromptText("Дата увольнения");
+
+                    CheckBox otpCheckBox = new CheckBox("В отпуске");
+                    otpCheckBox.setSelected(employee.isOtp());
+
+                    TextField obrField = new TextField(employee.getObr());
+                    obrField.setPromptText("Образование");
+
+                    TextField podrField = new TextField(employee.getPodr());
+                    podrField.setPromptText("Подразделение");
+
+                    Button saveButton = new Button("Сохранить");
+                    saveButton.setOnAction(e -> {
+                        // Сброс стилей и подсказок
+                        resetFieldStyle(famField, "Фамилия");
+                        resetFieldStyle(imField, "Имя");
+                        resetFieldStyle(otchField, "Отчество");
+                        resetFieldStyle(dolField, "Должность");
+                        resetFieldStyle(oklField, "Оклад");
+                        resetFieldStyle(tnField, "Табельный номер");
+                        resetFieldStyle(kolDetField, "Количество детей");
+                        resetFieldStyle(obrField, "Образование");
+                        resetFieldStyle(podrField, "Подразделение");
+
+                        // Проверка заполнения полей
+                        boolean isValid = true;
+
+                        if (famField.getText().isEmpty()) {
+                            highlightEmptyField(famField, "Фамилия");
+                            isValid = false;
+                        }
+                        if (imField.getText().isEmpty()) {
+                            highlightEmptyField(imField, "Имя");
+                            isValid = false;
+                        }
+                        if (otchField.getText().isEmpty()) {
+                            highlightEmptyField(otchField, "Отчество");
+                            isValid = false;
+                        }
+                        if (dolField.getText().isEmpty()) {
+                            highlightEmptyField(dolField, "Должность");
+                            isValid = false;
+                        }
+                        if (oklField.getText().isEmpty()) {
+                            highlightEmptyField(oklField, "Оклад");
+                            isValid = false;
+                        }
+                        if (tnField.getText().isEmpty()) {
+                            highlightEmptyField(tnField, "Табельный номер");
+                            isValid = false;
+                        }
+                        if (kolDetField.getText().isEmpty()) {
+                            highlightEmptyField(kolDetField, "Количество детей");
+                            isValid = false;
+                        }
+                        if (obrField.getText().isEmpty()) {
+                            highlightEmptyField(obrField, "Образование");
+                            isValid = false;
+                        }
+                        if (podrField.getText().isEmpty()) {
+                            highlightEmptyField(podrField, "Подразделение");
+                            isValid = false;
+                        }
+
+                        // Если все поля заполнены, сохраняем изменения
+                        if (isValid) {
+                            try {
+                                String fam = famField.getText();
+                                String im = imField.getText();
+                                String otch = otchField.getText();
+                                String dol = dolField.getText();
+                                double okl = Double.parseDouble(oklField.getText());
+                                String tn = tnField.getText();
+                                LocalDate drog = drogPicker.getValue();
+                                int kolDet = Integer.parseInt(kolDetField.getText());
+                                LocalDate datU = datUPicker.getValue();
+                                boolean otp = otpCheckBox.isSelected();
+                                String obr = obrField.getText();
+                                String podr = podrField.getText();
+
+                                // Обновление в базе данных
+                                try (Connection connection = DBConfig.getConnection()) {
+                                    String query = "UPDATE Employees SET FAM=?, IM=?, OTCH=?, DOL=?, OKL=?, TN=?, DROG=?, KOL_DET=?, DAT_U=?, OTP=?, OBR=?, PODR=? WHERE id=?";
+                                    PreparedStatement statement = connection.prepareStatement(query);
+                                    statement.setString(1, fam);
+                                    statement.setString(2, im);
+                                    statement.setString(3, otch);
+                                    statement.setString(4, dol);
+                                    statement.setDouble(5, okl);
+                                    statement.setString(6, tn);
+                                    statement.setDate(7, java.sql.Date.valueOf(drog));
+                                    statement.setInt(8, kolDet);
+                                    statement.setDate(9, datU != null ? java.sql.Date.valueOf(datU) : null);
+                                    statement.setBoolean(10, otp);
+                                    statement.setString(11, obr);
+                                    statement.setString(12, podr);
+                                    statement.setInt(13, employeeId);
+                                    statement.executeUpdate();
+                                }
+
+                                // Обновление таблицы
+                                employees.setAll(loadDataFromDatabase());
+                                stage.close();
+                            } catch (Exception ex) {
+                                System.out.println("Ошибка: " + ex.getMessage());
+                            }
+                        }
+                    });
+
+                    VBox layout = new VBox(10,
+                            famField, imField, otchField, dolField, oklField, tnField,
+                            drogPicker, kolDetField, datUPicker, otpCheckBox, obrField, podrField,
+                            saveButton);
+                    layout.setPadding(new Insets(10));
+
+                    Scene scene = new Scene(layout, 400, 600);
+                    scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/main_style.css")).toExternalForm());
+                    stage.setScene(scene);
+                    stage.show();
+                } else {
+                    System.out.println("Сотрудник с ID " + employeeId + " не найден.");
+                }
+            } catch (NumberFormatException ex) {
+                System.out.println("Некорректный ID.");
+            }
+        });
+    }
+
+    private void deleteEmployee() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Удаление сотрудника");
+        dialog.setHeaderText("Введите ID сотрудника:");
+        dialog.setContentText("ID:");
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(id -> {
+            try {
+                int employeeId = Integer.parseInt(id);
+
+                // Проверка, существует ли сотрудник с таким ID
+                Employee employee = employees.stream()
+                        .filter(e -> e.getId() == employeeId)
+                        .findFirst()
+                        .orElse(null);
+
+                if (employee != null) {
+                    // Удаление из базы данных
+                    try (Connection connection = DBConfig.getConnection()) {
+                        String query = "DELETE FROM Employees WHERE id=?";
+                        PreparedStatement statement = connection.prepareStatement(query);
+                        statement.setInt(1, employeeId);
+                        statement.executeUpdate();
+                    }
+
+                    // Обновление таблицы
+                    employees.setAll(loadDataFromDatabase());
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Удаление сотрудника");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Сотрудник с ID " + employeeId + " успешно удален.");
+                    alert.showAndWait();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Ошибка");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Сотрудник с ID " + employeeId + " не найден.");
+                    alert.showAndWait();
+                }
+            } catch (NumberFormatException ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Ошибка");
+                alert.setHeaderText(null);
+                alert.setContentText("Некорректный ID. Введите число.");
+                alert.showAndWait();
+            } catch (SQLException ex) {
+                System.out.println("Ошибка: " + ex.getMessage());
+            }
+        });
+    }
+
+    private void hireEmployee() {
+        addEmployee();
+    }
+
+    private void transferEmployee() {
+        Stage stage = new Stage();
+        stage.setTitle("Перевод сотрудника");
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Перевод сотрудника");
+        dialog.setHeaderText("Введите ID сотрудника:");
+        dialog.setContentText("ID:");
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(id -> {
+            try {
+                int employeeId = Integer.parseInt(id);
+
+                // Поле для ввода нового подразделения
+                TextField podrField = new TextField();
+                podrField.setPromptText("Новое подразделение");
+
+                Button saveButton = new Button("Сохранить");
+                saveButton.setOnAction(e -> {
+                    // Сброс стиля и подсказки
+                    resetFieldStyle(podrField, "Новое подразделение");
+
+                    // Проверка заполнения поля
+                    if (podrField.getText().isEmpty()) {
+                        highlightEmptyField(podrField, "Новое подразделение");
+                    } else {
+                        try (Connection connection = DBConfig.getConnection()) {
+                            String query = "UPDATE Employees SET PODR=? WHERE id=?";
+                            PreparedStatement statement = connection.prepareStatement(query);
+                            statement.setString(1, podrField.getText());
+                            statement.setInt(2, employeeId);
+                            statement.executeUpdate();
+                            stage.close();
+                        } catch (SQLException ex) {
+                            System.out.println("Ошибка: " + ex.getMessage());
+                        }
+
+                        // Обновление таблицы
+                        employees.setAll(loadDataFromDatabase());
+                    }
+                });
+
+                VBox layout = new VBox(10, podrField, saveButton);
+                layout.setPadding(new Insets(10));
+
+
+                Scene scene = new Scene(layout, 300, 150);
+                scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/main_style.css")).toExternalForm());
+                stage.setScene(scene);
+                stage.show();
+            } catch (NumberFormatException ex) {
+                System.out.println("Некорректный ID.");
+            }
+        });
+    }
+
+    private void dismissEmployee() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Увольнение сотрудника");
+        dialog.setHeaderText("Введите ID сотрудника:");
+        dialog.setContentText("ID:");
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(id -> {
+            try {
+                int employeeId = Integer.parseInt(id);
+
+                try (Connection connection = DBConfig.getConnection()) {
+                    String query = "UPDATE Employees SET DAT_U=? WHERE id=?";
+                    PreparedStatement statement = connection.prepareStatement(query);
+                    statement.setDate(1, java.sql.Date.valueOf(LocalDate.now()));
+                    statement.setInt(2, employeeId);
+                    statement.executeUpdate();
+                }
+
+                // Обновление таблицы
+                employees.setAll(loadDataFromDatabase());
+            } catch (Exception ex) {
+                System.out.println("Ошибка: " + ex.getMessage());
+            }
+        });
+    }
+
+    private void manageVacation() {
+        Stage stage = new Stage();
+        stage.setTitle("Управление отпусками");
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Управление отпусками");
+        dialog.setHeaderText("Введите ID сотрудника:");
+        dialog.setContentText("ID:");
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(id -> {
+            try {
+                int employeeId = Integer.parseInt(id);
+
+                Employee employee = employees.stream()
+                        .filter(e -> e.getId() == employeeId)
+                        .findFirst()
+                        .orElse(null);
+
+                if (employee != null) {
+                    CheckBox otpCheckBox = new CheckBox("В отпуске");
+                    otpCheckBox.setSelected(employee.isOtp());
+
+                    Button saveButton = new Button("Сохранить");
+                    saveButton.setOnAction(e -> {
+                        try (Connection connection = DBConfig.getConnection()) {
+                            String query = "UPDATE Employees SET OTP=? WHERE id=?";
+                            PreparedStatement statement = connection.prepareStatement(query);
+                            statement.setBoolean(1, otpCheckBox.isSelected());
+                            statement.setInt(2, employeeId);
+                            statement.executeUpdate();
+                            stage.close();
+                        } catch (SQLException ex) {
+                            System.out.println("Ошибка: " + ex.getMessage());
+                        }
+
+                        // Обновление таблицы
+                        employees.setAll(loadDataFromDatabase());
+                    });
+
+                    VBox layout = new VBox(10, otpCheckBox, saveButton);
+                    layout.setPadding(new Insets(10));
+
+
+                    Scene scene = new Scene(layout, 300, 150);
+                    scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/main_style.css")).toExternalForm());
+                    stage.setScene(scene);
+                    stage.show();
+                } else {
+                    System.out.println("Сотрудник с ID " + employeeId + " не найден.");
+                }
+            } catch (NumberFormatException ex) {
+                System.out.println("Некорректный ID.");
+            }
+        });
+    }
+
+    private void manageProfession() {
+        Stage stage = new Stage();
+        stage.setTitle("Справочник по профессиям");
+        ProfessionWindow professionWindow= new ProfessionWindow();
+        professionWindow.start(stage);
+    }
+
+    private void manageEducation() {
+        Stage stage = new Stage();
+        stage.setTitle("Справочник по образованию");
+        EducationWindow educationWindow = new EducationWindow();
+        educationWindow.start(stage);
+    }
+
+    private void manageSalary() {
+        Stage stage = new Stage();
+        stage.setTitle("Справочник по зарплате");
+        SalaryWindow salaryWindow = new SalaryWindow();
+        salaryWindow.start(stage);
+    }
+
+    private void showDismissedCount() {
+        try (Connection connection = DBConfig.getConnection()) {
+            String query = "SELECT COUNT(*) AS dismissed_count FROM Employees WHERE DAT_U IS NOT NULL";
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                int dismissedCount = resultSet.getInt("dismissed_count");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Количество уволенных");
+                alert.setHeaderText(null);
+                alert.setContentText("Количество уволенных сотрудников: " + dismissedCount);
+                alert.showAndWait();
+            }
+        } catch (SQLException ex) {
+            System.out.println("Ошибка: " + ex.getMessage());
+        }
+    }
+
+    private void showLaidOffCount() {
+        try (Connection connection = DBConfig.getConnection()) {
+            String query = "SELECT COUNT(*) AS lim_count FROM Employees WHERE dol='Сокращен';";
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                int limCount = resultSet.getInt("lim_count");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Количество сокращенных");
+                alert.setHeaderText(null);
+                alert.setContentText("Количество сокращенных сотрудников: " + limCount);
+                alert.showAndWait();
+            }
+        } catch (SQLException ex) {
+            System.out.println("Ошибка: " + ex.getMessage());
+        }
+    }
+
+    private void showSickLeaveCount() {
+        try (Connection connection = DBConfig.getConnection()) {
+            String query = "SELECT COUNT(*) AS lim_count FROM Employees WHERE otp=true;";
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                int limCount = resultSet.getInt("lim_count");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Количество больничных");
+                alert.setHeaderText(null);
+                alert.setContentText("Количество больничных: " + limCount);
+                alert.showAndWait();
+            }
+        } catch (SQLException ex) {
+            System.out.println("Ошибка: " + ex.getMessage());
+        }
+    }
 }
-
