@@ -4,7 +4,19 @@
 
 Это CRUD приложение, созданное в ходе выполнения курсовой работы по предмету "Базы данных SQL"
 Оно представляет собой клиент-серверное приложение, позволяющее взаимодействовать с базой данных PostgreSQL.
+<div align="center">
+ <picture>
+  <img src="https://github.com/KuivaMachine/UniversityCRUDapp/blob/master/screen.png"alt="Описание изображения">
+</picture>
+</div>
 
+---
+
+<div align="center">
+ <picture>
+  <img src="https://github.com/KuivaMachine/UniversityCRUDapp/blob/master/screen2.png"alt="Описание изображения">
+</picture>
+</div>
 Для запуска:
 
     git pull https://github.com/KuivaMachine/UniversityCRUDapp.git
